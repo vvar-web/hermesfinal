@@ -1,40 +1,42 @@
 const express = require('express');
 const axios = require('axios');
+const path = require('path');
 const app = express();
-const port = 3000;
+const PORT = 3000;
 
-const NEWS_API_KEY = 'dae9fd5fab0f4466a9a26c038bf57d98'; // Replace with your NewsAPI key
+// Your NewsAPI key
+const API_KEY = 'dae9fd5fab0f4466a9a26c038bf57d98';
 
-app.get('/', async (req, res) => {
-    const { country, category, q } = req.query; // Query parameters
-    const baseUrl = `https://newsapi.org/v2/top-headlines?apiKey=${NEWS_API_KEY}`;
+// Serve static files
+app.use(express.static(path.join(__dirname, 'views')));
+
+// Fetch news based on user input
+app.get('/news', async (req, res) => {
+    const { query, country, category } = req.query; // Accept user query parameters
+    const url = `https://newsapi.org/v2/top-headlines?apiKey=${API_KEY}&q=${query}&country=${country}&category=${category}`;
 
     try {
-        const response = await axios.get(baseUrl, {
-            params: { country, category, q }
-        });
+        const response = await axios.get(url);
+        const articles = response.data.articles.slice(0, 5); // Fetch and limit to 5 articles
 
-        const articles = response.data.articles.slice(0, 5); // Fetch top 5 articles
-
-        let htmlContent = '<h1>Latest News Articles</h1>';
+        let output = '<h1>Latest News</h1>';
         articles.forEach(article => {
-            htmlContent += `
-                <div>
-                    <h2>${article.title}</h2>
-                    <p>${article.description}</p>
-                    <a href="${article.url}" target="_blank">Read more</a>
-                </div>
-                <hr>
-            `;
+            output += `<h2>${article.title}</h2>
+                       <p>${article.description}</p>
+                       <a href="${article.url}" target="_blank">Read More</a>`;
         });
 
-        res.send(htmlContent); // Send HTML page
+        res.send(output);
     } catch (error) {
-        console.error(error);
-        res.status(500).send('Error fetching news articles');
+        res.status(500).send('Error fetching news. Please check your input or try again later.');
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`);
+// Display the homepage
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views/index.html'));
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running at http://localhost:${PORT}`);
 });
