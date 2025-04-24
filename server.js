@@ -3,7 +3,7 @@ const axios = require('axios');
 const app = express();
 const port = 3000;
 
-const NEWS_API_KEY = 'your_api_key_here'; // Replace with your NewsAPI key
+const NEWS_API_KEY = 'dae9fd5fab0f4466a9a26c038bf57d98'; // Replace with your NewsAPI key
 
 app.get('/', async (req, res) => {
     const { country, category, q } = req.query; // Query parameters
